@@ -1,6 +1,7 @@
 package com.example.android.sunshine.app;
 
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -78,7 +80,9 @@ public class ForecastFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(view.getContext(), adapter.getItem(position), Toast.LENGTH_LONG).show();
+                Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
+                detailIntent.putExtra(Intent.EXTRA_TEXT, adapter.getItem(position));
+                startActivity(detailIntent);
             }
         });
         return rootView;
@@ -168,7 +172,6 @@ public class ForecastFragment extends Fragment {
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
-        private final String openWeatherMapApiKey = "4f40bd11bac59593b9dd96e021b9cc41";
 
         @Override
         protected String[] doInBackground(String... params) {
@@ -196,7 +199,7 @@ public class ForecastFragment extends Fragment {
                         .appendQueryParameter(FORMAT_PARAM, format)
                         .appendQueryParameter(UNITS_PARAM, units)
                         .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
-                        .appendQueryParameter(APPID_PARAM, openWeatherMapApiKey)
+                        .appendQueryParameter(APPID_PARAM, BuildConfig.OWM_API_KEY)
                         .build();
 
                 URL url = new URL(builtUri.toString());
