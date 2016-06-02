@@ -8,14 +8,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.os.AsyncTaskCompat;
 import android.text.format.Time;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +44,7 @@ public class ForecastFragment extends Fragment {
 
     String[] forecastArray = {"Today-Sunny-88/63", "Tomorrow-Fogy-70-46",
             "Weds-Cloudy-72/63", "Thurs-Rainy-64/51", "Fri-Foggy-70/46"};
-    ArrayList<String> fakeData = new ArrayList<String>(Arrays.asList(forecastArray));
+    ArrayList<String> fakeData = new ArrayList<>(Arrays.asList(forecastArray));
     ArrayAdapter<String> adapter;
     ListView listView;
 
@@ -59,15 +62,25 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        adapter = new ArrayAdapter<String>(
+        adapter = new ArrayAdapter<>(
                 getActivity(),
                 R.layout.list_item_forecast,
                 R.id.list_item_forecast_textview, fakeData
         );
+
+        //get a reference to the View's ListView
         listView = (ListView) rootView.findViewById(R.id.list_view_forecast);
+
+        //Assign the ArrayAdapter to the ListView
         listView.setAdapter(adapter);
 
-
+        //Creates a tap listener that shows a Toast when a ListView item is clicked.
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(view.getContext(), adapter.getItem(position), Toast.LENGTH_LONG).show();
+            }
+        });
         return rootView;
     }
 
