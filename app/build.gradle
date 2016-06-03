@@ -10,15 +10,14 @@ android {
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
+        buildConfigField "String", "OWM_API_KEY", OWM_API_KEY
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-    buildTypes.each {
-        it.buildConfigField 'String', 'OWM_API_KEY', '4f40bd11bac59593b9dd96e021b9cc41'
+
     }
 }
 
