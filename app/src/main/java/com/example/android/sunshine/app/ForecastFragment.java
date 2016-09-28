@@ -41,9 +41,6 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class ForecastFragment extends Fragment {
     final String LOG_TAG = ForecastFragment.class.getSimpleName();
 
@@ -57,6 +54,8 @@ public class ForecastFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        //fetch weather information on app start.
         updateWeather();
     }
 
@@ -121,10 +120,16 @@ public class ForecastFragment extends Fragment {
     }
 
     //prettifies weather values returned from JSON call
-    private String formatHighLows(double high, double low) {
+    private String formatHighLows(double high, double low, String unitType) {
+        if(unitType.equals(getString(R.string.pref_unit_value_imperial))) {
+            high = (high * 1.8) + 32;
+            low = (low * 1.8) + 32;
+        } else if(!unitType.equals(getString(R.string.pref_unit_value_metric))) {
+            Log.d(LOG_TAG, "Unit type not found:" + unitType);
+        }
+
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
-
         return roundedHigh + "/" + roundedLow;
     }
 
@@ -171,8 +176,12 @@ public class ForecastFragment extends Fragment {
             double high = mainObject.getDouble(OWM_MAX);
             double low = mainObject.getDouble(OWM_MIN);
 
-            //format the high and low temps; concatenate day, desc, and formatted highLow
-            highLow = formatHighLows(high, low);
+            //format the high and low temps according to unit type from settings; concatenate day,
+            // desc, and formatted highLow
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String unitType = preferences.getString(getString(R.string.pref_units_key),
+                    getString(R.string.pref_unit_defaultValue));
+            highLow = formatHighLows(high, low, unitType);
             resultStrs[i] = day + " - " + description + " - " + highLow;
         }
 
