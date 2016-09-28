@@ -1,10 +1,14 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-
+import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -34,16 +38,38 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.action_view_on_map:
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+                showMap(preferences.getString(getString(R.string.pref_location_key),
+                        getString(R.string.pref_location_default)));
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
+    public void showMap(String zipCode) {
+        final String BASE_URI = "geo:0,0?";
+        final String QUERY = "q";
+
+        Uri builtUri = Uri.parse(BASE_URI).buildUpon()
+                .appendQueryParameter(QUERY, zipCode)
+                .build();
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(builtUri);
+
+        if(intent.resolveActivity(this.getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Toast toast = Toast.makeText(this, "No map app available.", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    }
 
 }
