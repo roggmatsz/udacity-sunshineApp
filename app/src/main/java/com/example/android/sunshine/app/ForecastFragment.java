@@ -1,10 +1,13 @@
 package com.example.android.sunshine.app;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.os.AsyncTaskCompat;
 import android.text.format.Time;
@@ -44,9 +47,6 @@ import java.util.StringTokenizer;
 public class ForecastFragment extends Fragment {
     final String LOG_TAG = ForecastFragment.class.getSimpleName();
 
-    String[] forecastArray = {"Today-Sunny-88/63", "Tomorrow-Fogy-70-46",
-            "Weds-Cloudy-72/63", "Thurs-Rainy-64/51", "Fri-Foggy-70/46"};
-    ArrayList<String> fakeData = new ArrayList<>(Arrays.asList(forecastArray));
     ArrayAdapter<String> adapter;
     ListView listView;
 
@@ -57,6 +57,7 @@ public class ForecastFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        updateWeather();
     }
 
     @Override
@@ -67,7 +68,8 @@ public class ForecastFragment extends Fragment {
         adapter = new ArrayAdapter<>(
                 getActivity(),
                 R.layout.list_item_forecast,
-                R.id.list_item_forecast_textview, fakeData
+                R.id.list_item_forecast_textview,
+                new ArrayList<String>()
         );
 
         //get a reference to the View's ListView
@@ -88,6 +90,14 @@ public class ForecastFragment extends Fragment {
         return rootView;
     }
 
+    private void updateWeather() {
+        FetchWeatherTask task = new FetchWeatherTask();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = preferences.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        task.execute(location);
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.forecastfragment, menu);
@@ -97,8 +107,7 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                FetchWeatherTask task = new FetchWeatherTask();
-                task.execute("27101");
+                updateWeather();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -256,11 +265,11 @@ public class ForecastFragment extends Fragment {
         @Override
         protected void onPostExecute(String[] strings) {
             if(strings != null) {
-                fakeData = new ArrayList<>(Arrays.asList(strings));
                 adapter = new ArrayAdapter<>(
                         getActivity(),
                         R.layout.list_item_forecast,
-                        R.id.list_item_forecast_textview, fakeData
+                        R.id.list_item_forecast_textview,
+                        new ArrayList<String>(Arrays.asList(strings))
                 );
 
                 listView.setAdapter(adapter);
